@@ -10,6 +10,13 @@ import { MenuItems } from './Constants/MenuItems'
 const useStyles = makeStyles((theme) => ({
     menuList: {
         marginTop: "64px"
+    },
+    centered: {
+        display: "flex!important",
+        justifyContent: "center!important",
+    },
+    flexColumn: {
+        flexDirection: "column"
     }
 }))
 
@@ -34,15 +41,15 @@ const SideBar = () => {
             BackdropProps={{ invisible: true }}
             elevation={5}
             sx={{
-                ...(open ? { width: drawerWidth } : { width: 75 }),
+                ...(open ? { width: drawerWidth } : { width: 70 }),
                 flexShrink: 0,
-                [`& .MuiDrawer-paper`]: { ...(open ? { width: drawerWidth } : { width: 75 }), boxSizing: 'border-box', transition: ".2s ease-in-out" },
+                [`& .MuiDrawer-paper`]: { ...(open ? { width: drawerWidth } : { width: 70 }), boxSizing: 'border-box', transition: ".2s ease-in-out" },
                 position: "relative"
             }}
         >
             <DrawerHeader>
-                <IconButton size="large" variant="contained" color="primary" component="span" onClick={handleToggleDrawer} sx={{
-                    position: "absolute", ...(open ? { right: 0 } : { right: "20%", }),
+                <IconButton size="small" variant="contained" color="primary" component="span" onClick={handleToggleDrawer} sx={{
+                    position: "absolute", ...(open ? { right: ".5rem", top: ".5rem" } : { right: "25%", top: ".5rem" }),
                 }}>
                     {open ? <CloseIcon /> : <MenuIcon />}
 
@@ -51,10 +58,10 @@ const SideBar = () => {
 
 
             <div className={classes.menuList}>
-                <List>
+                <List className={`${classes.centered} ${classes.flexColumn}`}>
                     {
                         MenuItems.map((item) => (
-                            <MenuItem key={item.text}>
+                            <MenuItem key={item.text} className={classes.centered}>
                                 <ListItemIcon>{item.icon}</ListItemIcon>
                                 {open && <ListItemText>  {item.text} </ListItemText>}
                             </MenuItem>

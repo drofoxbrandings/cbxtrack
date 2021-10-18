@@ -31,7 +31,8 @@ const SideBar = () => {
     const DrawerHeader = styled('div')(({ theme }) => ({
         position: "absolute",
         top: 0,
-        width: "100%"
+        width: "100%",
+        height: "64px"
     }))
     return (
         <Drawer
@@ -44,18 +45,18 @@ const SideBar = () => {
                 ...(open ? { width: drawerWidth } : { width: 70 }),
                 flexShrink: 0,
                 [`& .MuiDrawer-paper`]: { ...(open ? { width: drawerWidth } : { width: 70 }), boxSizing: 'border-box', transition: ".2s ease-in-out" },
-                position: "relative"
+                position: "relative",
+                padding: "1rem"
             }}
         >
             <DrawerHeader>
                 <IconButton size="small" variant="contained" color="primary" component="span" onClick={handleToggleDrawer} sx={{
-                    position: "absolute", ...(open ? { right: ".5rem", top: ".5rem" } : { right: "25%", top: ".5rem" }),
+                    position: "absolute", right: "-1rem", zIndex: "15000"
                 }}>
                     {open ? <CloseIcon /> : <MenuIcon />}
 
                 </IconButton >
             </DrawerHeader>
-
 
             <div className={classes.menuList}>
                 <List className={`${classes.centered} ${classes.flexColumn}`}>

@@ -32,8 +32,7 @@ export const validateUser = [
     check('emiratesId')
         .escape()
         .matches(/^784-[0-9]{4}-[0-9]{7}-[0-9]{1,2}$/)
-        .withMessage('Invalid emirates Id number')
-        .bail(),
+        .withMessage('Invalid emirates Id number'),
     check('role')
         .escape()
         .not()
@@ -42,8 +41,8 @@ export const validateUser = [
     function (req, res, next) {
 
         var errorValidation = validationResult(req);
-        if (errorValidation) {
-            return res.status(422).json({ errorValidation: errorValidation.array() });
+        if (!errorValidation.isEmpty()) {
+            return res.status(400).json({ errorValidation: errorValidation.array() });
         }
         next()
     }

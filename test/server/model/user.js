@@ -1,16 +1,15 @@
-import  mongoose  from "mongoose";
+import mongoose from "mongoose";
 
 const userSchema = mongoose.Schema({
-    firstName: "",
-    LastName: "",
-    email: "",
-    phone: "",
-    emiratesId: "",
-    employeeId: "",
-    role: "",
-    password: "",
-    token: "",
-    status: ""
+    firstName: String,
+    LastName: String,
+    email: String,
+    phone: String,
+    emiratesId: String,
+    employeeId: String,
+    role: String,
+    password: String,
+    status: String
 })
 
 var userData = mongoose.model("userData", userSchema)

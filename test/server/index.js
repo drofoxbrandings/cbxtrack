@@ -4,17 +4,23 @@ import * as ENV from 'dotenv'
 import cors from 'cors'
 import express from 'express'
 import userRoutes from './routes/Users.js';
+import webMailRoutes from './routes/Webmails.js';
+import ShipmentStatusRoutes from './routes/ShipmentStatus.js';
+import ShipmentRoutes from './routes/Shipment.js';
 
 ENV.config()
 const app = express()
 
 app.use(express.json());
 app.use(cors({
-    origin: "http://localhost"
+    // origin: "http://localhost"
 }))
 
 
-app.use('/api', userRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/mails', webMailRoutes);
+app.use('/api/shipment/status', ShipmentStatusRoutes);
+app.use('/api/shipment', ShipmentRoutes);
 
 
 const CONNECTION_URL = process.env.CONNECTION_URL;

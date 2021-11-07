@@ -50,7 +50,7 @@ export const addShipment = async (req, res) => {
     })
     try {
         await newShipment.save();
-        res.status(201).json("Status added successfully !!");
+        res.status(201).json({ message: "Status added successfully !!" });
     } catch (error) {
         res.status(409).json({ message: error.message });
     }
@@ -88,7 +88,7 @@ export const updateShipment = async (req, res) => {
         shipment.activeFlag = req.body.activeFlag
         shipment.save()
             .then(() => {
-                res.status(200).json("Shipment information updated successfully! ")
+                res.status(200).json({ message: "Shipment information updated successfully! " })
             })
             .catch(err => res.status(400).json('Error:' + err))
     })
@@ -103,7 +103,7 @@ export const discardShipment = async (req, res) => {
             shipment.save()
         })
         .then(() => {
-            res.status(200).json("Shipment discarded successfully !!")
+            res.status(200).json({ message: "Shipment discarded successfully !!" })
         })
         .catch(err => res.status(400).json('Error:' + err))
 }
@@ -116,28 +116,28 @@ export const activateShipment = async (req, res) => {
             shipment.save()
         })
         .then(() => {
-            res.status(200).json("Shipment re-activated successfully !!")
+            res.status(200).json({ message: "Shipment re-activated successfully !!" })
         })
         .catch(err => res.status(400).json('Error:' + err))
 }
 
 export const deleteShipment = async (req, res) => {
     await shipmentData.findByIdAndDelete(req.params.id)
-        .then(() => res.json("Shipment deleted successfully"))
+        .then(() => res.json({ message: "Shipment deleted successfully" }))
         .catch(err => res.status(400).json('Error:' + err))
 }
 
 
 export const updateShipmentStatus = async (req, res) => {
     const thisShipment = req.params.id
-    const shipmentStatus = req.body
+    let { shipmentStatus } = req.body
     await shipmentData.findByIdAndUpdate(thisShipment)
         .then((shipment) => {
-            shipment.shipmentStatus = req.body
+            shipment.shipmentStatus = shipmentStatus
             shipment.save()
         })
         .then(() => {
-            res.status(200).json("Shipment re-activated successfully !!")
+            res.status(200).json({ message: "Shipment re-activated successfully !!" })
         })
         .catch(err => res.status(400).json('Error:' + err))
 }

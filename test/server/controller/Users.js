@@ -1,5 +1,4 @@
-import express from 'express';
-import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs'
 
 import userData from '../model/user.js'
 
@@ -55,12 +54,13 @@ export const checkEidExists = async (req, res) => {
 }
 
 export const addUser = async (req, res) => {
-    const { firstName, LastName, email, phone, emiratesId, employeeId, role, password, token, status } = req.body;
+    const { firstName, LastName, email, phone, emiratesId, employeeId, role, status } = req.body;
+    const password = await bcrypt.hash(req.body.password, 10)
     const newUser = new userData({ firstName, LastName, email, phone, emiratesId, employeeId, role, password, status })
 
     try {
         await newUser.save();
-        res.status(201).json("User added successfully !!");
+        res.status(201).json({ message: "User added successfully !!" });
     } catch (error) {
         res.status(409).json({ message: error.message });
     }
@@ -96,7 +96,7 @@ export const updateUser = async (req, res) => {
         user.status = req.body.status
         user.save()
             .then(() => {
-                res.status(200).json("User updated")
+                res.status(200).json({ message: "User information updated" })
             })
             .catch(err => res.status(400).json('Error:' + err))
     })
@@ -104,6 +104,6 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
     await userData.findByIdAndDelete(req.params.id)
-        .then(() => res.json("User deleted successfully"))
+        .then(() => res.json({ message: "User deleted successfully" }))
         .catch(err => res.status(400).json('Error:' + err))
 }

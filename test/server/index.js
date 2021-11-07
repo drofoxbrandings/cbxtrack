@@ -7,6 +7,7 @@ import userRoutes from './routes/Users.js';
 import webMailRoutes from './routes/Webmails.js';
 import ShipmentStatusRoutes from './routes/ShipmentStatus.js';
 import ShipmentRoutes from './routes/Shipment.js';
+import AuthRoutes from './routes/Auth.js';
 
 ENV.config()
 const app = express()
@@ -21,6 +22,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/mails', webMailRoutes);
 app.use('/api/shipment/status', ShipmentStatusRoutes);
 app.use('/api/shipment', ShipmentRoutes);
+app.use('/api/auth', AuthRoutes);
 
 
 const CONNECTION_URL = process.env.CONNECTION_URL;

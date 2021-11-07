@@ -8,7 +8,7 @@ export const saveWebMail = async (req, res) => {
     const newWebMail = new webMailData({ uname, phone, email, message })
     try {
         await newWebMail.save();
-        res.status(201).json("Mail added successfully !!");
+        res.status(201).json({ message: "Mail added successfully !!" });
     } catch (error) {
         res.status(409).json({ message: error.message });
     }
@@ -30,6 +30,6 @@ export const getSingleMail = async (req, res) => {
 
 export const deleteMail = async (req, res) => {
     await webMailData.findByIdAndDelete(req.params.id)
-        .then(() => res.json("Mail deleted successfully"))
+        .then(() => res.json({ message: "Mail deleted successfully" }))
         .catch(err => res.status(400).json('Error:' + err))
 }

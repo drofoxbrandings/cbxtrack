@@ -8,7 +8,7 @@ export const addStatus = async (req, res) => {
     const newShipmentStatus = new shipmentStatusData({ shipmentStatus })
     try {
         await newShipmentStatus.save();
-        res.status(201).json("Status added successfully !!");
+        res.status(201).json({ message: "Status added successfully !!" });
     } catch (error) {
         res.status(409).json({ message: error.message });
     }
@@ -24,6 +24,6 @@ export const listStatus = async (req, res) => {
 
 export const deleteStatus = async (req, res) => {
     await shipmentStatusData.findByIdAndDelete(req.params.id)
-        .then(() => res.json("Status deleted successfully"))
+        .then(() => res.json({ message: "Status deleted successfully" }))
         .catch(err => res.status(400).json('Error:' + err))
 }

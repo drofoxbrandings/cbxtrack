@@ -19,16 +19,15 @@ export const validateUser = [
         .withMessage('Email should not be empty')
         .bail()
         .isEmail()
-        .withMessage('Invalid email')
-        .bail(),
+        .withMessage('Invalid email'),
     check('phone')
         .escape()
         .not()
         .isEmpty()
         .withMessage('Phone number should not be empty')
+        .bail()
         .isMobilePhone(['ar-AE'])
-        .withMessage('Invalid mobile number')
-        .bail(),
+        .withMessage('Invalid mobile number'),
     check('emiratesId')
         .escape()
         .matches(/^784-[0-9]{4}-[0-9]{7}-[0-9]{1,2}$/)
@@ -38,6 +37,15 @@ export const validateUser = [
         .not()
         .isEmpty()
         .withMessage('Please select the role'),
+    check('password')
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('please enter a password')
+        .bail()
+        .exists()
+        .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/)
+        .withMessage('Password must contain atleast one uppercase letter, one numeric digit and one special character'),
     function (req, res, next) {
 
         var errorValidation = validationResult(req);
@@ -68,16 +76,15 @@ export const validateMails = [
         .withMessage('Please enter email id!')
         .bail()
         .isEmail()
-        .withMessage('Invalid email')
-        .bail(),
+        .withMessage('Invalid email'),
     check('phone')
         .escape()
         .not()
         .isEmpty()
-        .withMessage('Please enter phone number!')
+        .withMessage('Please enter mobile number!')
+        .bail()
         .isMobilePhone(['ar-AE'])
-        .withMessage('Invalid mobile number!')
-        .bail(),
+        .withMessage('Invalid mobile number!'),
     check('message')
         .escape()
         .not()
@@ -124,6 +131,91 @@ export const validateShipment = [
         .exists()
         .isLength({ min: 3 })
         .withMessage('shipper name is too short'),
+    check('shipperPhone')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Please add shipper phone')
+        .bail()
+        .isMobilePhone(['ar-AE'])
+        .withMessage('Invalid mobile number!'),
+    check('shipperLocation')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Please add shipper location')
+        .bail()
+        .isLength({ min: 3 })
+        .withMessage('shipper location is too short'),
+    check('shipperCountry')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Please add shipper country'),
+    check('consigneeName')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Please add consignee name')
+        .bail()
+        .exists()
+        .isLength({ min: 3 })
+        .withMessage('consignee name is too short'),
+    check('consigneePhone')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Please add consignee phone number')
+        .bail()
+        .exists()
+        .isLength({ min: 10 })
+        .withMessage('invalid phone number'),
+    check('consigneePhone')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Please add consignee phone number')
+        .bail()
+        .exists()
+        .isLength({ min: 10 })
+        .withMessage('invalid phone number'),
+    check('delliverLocation')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Please add delivery location'),
+    check('deliveryCity')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Please add delivery city'),
+    check('deliveryCountry')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Please add delivery country'),
+    check('commodity')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Please add commodity'),
+    check('numberOfPackages')
+        .trim()
+        .escape()
+        .not()
+        .isEmpty()
+        .withMessage('Number of packages should not be empty'),
+
     function (req, res, next) {
         var errorValidation = validationResult(req);
         if (!errorValidation.isEmpty()) {

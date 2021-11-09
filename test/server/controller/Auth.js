@@ -4,10 +4,7 @@ import bcrypt from 'bcryptjs'
 import userData from '../model/user.js'
 import PasswordResetData from '../model/PasswordReset.js'
 import nodemailer from 'nodemailer'
-import { otpMail } from '../Templates/otpMail.js'
 
-
-var generatedOtp = Math.floor(1000 + Math.random() * 9000);
 
 function makeid(length) {
     var result = '';
@@ -18,6 +15,14 @@ function makeid(length) {
             charactersLength));
     }
     return result;
+}
+
+function diff_minutes(dt2, dt1) {
+
+    var diff = (dt2.getTime() - dt1.getTime()) / 1000;
+    diff /= 60;
+    return Math.abs(Math.round(diff));
+
 }
 
 export const login = async (req, res) => {
@@ -68,6 +73,45 @@ export const login = async (req, res) => {
 }
 
 
+export const sendPasswordResetLink = async (req, res) => {
+    const { email } = req.body
+    const user = await userData.findOne({ email: email })
+    if (!user) {
+        res.status(404).json({ message: "No such user exists !!" })
+    }
+    let token = PasswordResetData.findOne({ _id: user._id });
+    if (token) {
+        token.deleteOne()
+    };
+
+
+    let resetToken = makeid(25)
+    const hash = await bcrypt.hash(resetToken, 10);
+
+
+    const newResetData = new PasswordResetData({ email: email, resetToken: hash, createdTime: Date.now() })
+    try {
+        newResetData.save()
+        res.json("Password reset link sent to your email.")
+        setInterval(() => {
+            const thisResetData = req.params.id
+            PasswordResetData.findByIdAndUpdate(thisResetData)
+                .then((resetFlag) => {
+                    resetFlag.activeFlag = 1
+                    resetFlag.save()
+                })
+                .catch(err => res.status(400).json('Error:' + err))
+        }, 900000);
+    } catch (error) {
+        res.status(409).json({ message: error.message });
+    }
+
+
+
+
+}
+
+
 export const sendResetPasswordLink = async (req, res) => {
     const { email } = req.body
     userData.findOne({ email: email })
@@ -77,6 +121,12 @@ export const sendResetPasswordLink = async (req, res) => {
             }
             else {
 
+
+
+                const resetToken = makeid(25)
+                let createdTime = new Date()
+                let activeFlag = 0
+
                 var transport = nodemailer.createTransport({
                     host: 'smtp.mailtrap.io',
                     port: 587,
@@ -85,9 +135,6 @@ export const sendResetPasswordLink = async (req, res) => {
                         pass: '658d3e932cf64f',
                     },
                 });
-                const resetToken = makeid(25)
-                let createdTime = new Date()
-                let activeFlag = 0
 
                 var mailData = {
                     from: 'noreply@domain.com',
@@ -129,22 +176,32 @@ export const sendResetPasswordLink = async (req, res) => {
 export const validateResetLink = async (req, res) => {
     const { email, resetToken } = req.body
     await PasswordResetData.findOne({ email: email })
-        .then(userExists => {
-            if (!userExists) {
+        .then(user => {
+            if (!user) {
                 res.json("Invalid or unauthorized access !!")
             }
-            else {
-                let curTime = new Date();
-                let dbTime = userExists.createdTime;
-                console.log(dbTime)
-                var diffMs = (curTime - dbTime);
-                var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
-                if (curTime) {
-
-                }
-                console.log(diffMins)
+        })
+        .then(timeExpired => {
+            let curTime = new Date();
+            let dbTime = user.createdTime;
+            var diff = diff_minutes(dbTime, curTime)
+            if (diff > 15) {
+                res.status(410).json({ message: "Page Expired" })
             }
         })
+        .then(
+            await PasswordResetData.findOne({ resetToken: resetToken })
+        )
+        .then(
+            token => {
+                if (!token) {
+                    res.status(401).status("Invalid reset token")
+                }
+                else {
+                    res.status(200)
+                }
+            })
+
 }
 
 export const changePassword = (req, res) => {

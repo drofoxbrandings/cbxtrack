@@ -5,9 +5,9 @@ const PasswordResetSchema = mongoose.Schema({
     resetToken: String,
     createdTime: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        expires: 1800
     },
-    activeFlag: Boolean,
 })
 
 var PasswordResetData = mongoose.model("PasswordResetData", PasswordResetSchema)

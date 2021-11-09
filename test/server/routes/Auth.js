@@ -1,14 +1,14 @@
 import express from "express";
 import {
     login,
-    sendResetPasswordLink,
+    sendPasswordResetLink,
     validateResetLink
 } from '../controller/Auth.js'
 
 const router = express.Router()
 
 router.post('/login', login)
-router.post('/sendResetPasswordLink', sendResetPasswordLink)
+router.post('/sendPasswordResetLink', sendPasswordResetLink)
 router.post('/validateResetLink', validateResetLink)
 
 export default router;

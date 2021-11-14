@@ -2,13 +2,15 @@ import express from "express";
 import {
     login,
     sendPasswordResetLink,
-    validateResetLink
+    resetPassword,
+    changePassword
 } from '../controller/Auth.js'
 
 const router = express.Router()
 
 router.post('/login', login)
 router.post('/sendPasswordResetLink', sendPasswordResetLink)
-router.post('/validateResetLink', validateResetLink)
+router.post('/resetPassword', resetPassword)
+router.post('/changePassword', changePassword)
 
 export default router;

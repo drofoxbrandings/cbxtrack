@@ -75,139 +75,122 @@ export const login = async (req, res) => {
 
 export const sendPasswordResetLink = async (req, res) => {
     const { email } = req.body
-    const user = await userData.findOne({ email: email })
-    if (!user) {
-        res.status(404).json({ message: "No such user exists !!" })
-    }
-    let token = PasswordResetData.findOne({ _id: user._id });
-    if (token) {
-        token.deleteOne()
-    };
-
-
-    let resetToken = makeid(25)
-    const hash = await bcrypt.hash(resetToken, 10);
-
-
-    const newResetData = new PasswordResetData({ email: email, resetToken: hash, createdTime: Date.now() })
+    const user = await userData.findOne({ email })
     try {
-        newResetData.save()
-        res.json("Password reset link sent to your email.")
-        setInterval(() => {
-            const thisResetData = req.params.id
-            PasswordResetData.findByIdAndUpdate(thisResetData)
-                .then((resetFlag) => {
-                    resetFlag.activeFlag = 1
-                    resetFlag.save()
-                })
-                .catch(err => res.status(400).json('Error:' + err))
-        }, 900000);
+        if (!user) {
+            res.status(404).json({ message: "No such user exists !!" })
+        }
+        else {
+            let token = PasswordResetData.findOne({ userId: user._id });
+            if (token) {
+                await token.deleteOne()
+            };
+        }
+        let resetToken = makeid(25)
+        const hash = await bcrypt.hash(resetToken, 10);
+        var transport = nodemailer.createTransport({
+            host: 'smtp.mailtrap.io',
+            port: 587,
+            auth: {
+                user: 'cfe4a3ec13085a',
+                pass: '658d3e932cf64f',
+            },
+        });
+
+        var mailData = {
+            from: 'noreply@domain.com',
+            to: email,
+            subject: `Password reset link`,
+            html: '<h2>Please find below the link to reset your password. The link expires in 15 minutes</h2>' +
+                `<p><a href='https://cityboxcargomovers.com/resetPassword?user=${user._id}&token=${resetToken}'>Click here to reset password</a></p>`
+        };
+
+        transport.sendMail(mailData, (error, info) => {
+            if (error) {
+                return console.log(error);
+            }
+        });
+        const newResetData = new PasswordResetData({ userId: user._id, email: email, resetToken: hash, createdTime: Date.now() })
+        try {
+
+            newResetData.save()
+            res.json("Password reset link sent to your email.")
+        } catch (error) {
+
+            res.status(409).json({ message: error.message });
+        }
     } catch (error) {
-        res.status(409).json({ message: error.message });
+        console.log(error.message)
     }
 
 
+    try {
 
+
+    } catch (error) {
+    }
 
 }
 
+export const resetPassword = async (req, res) => {
+    const passResetInfo = req.body
 
-export const sendResetPasswordLink = async (req, res) => {
-    const { email } = req.body
-    userData.findOne({ email: email })
-        .then(dbUser => {
-            if (!dbUser) {
-                res.json("No such user available!!")
-            }
-            else {
-
-
-
-                const resetToken = makeid(25)
-                let createdTime = new Date()
-                let activeFlag = 0
-
-                var transport = nodemailer.createTransport({
-                    host: 'smtp.mailtrap.io',
-                    port: 587,
-                    auth: {
-                        user: 'cfe4a3ec13085a',
-                        pass: '658d3e932cf64f',
-                    },
-                });
-
-                var mailData = {
-                    from: 'noreply@domain.com',
-                    to: email,
-                    subject: `Password reset link`,
-                    html: '<h2>Please find below the link to reset your password. The link expires in 15 minutes</h2>' +
-                        `<p><a href='https://cityboxcargomovers.com/resetPassword?e=${email}&t=${resetToken}'>Click here to reset password</a></p>`
-                };
-
-                transport.sendMail(mailData, (error, info) => {
-                    if (error) {
-                        return console.log(error);
-                    } else {
-                        return console.log("Password reset link sent to your email.");
-                    }
-                });
-
-                const newResetData = new PasswordResetData({ email, resetToken, createdTime, activeFlag })
-                try {
-                    newResetData.save()
-                    res.json("Password reset link sent to your email.")
-                    setInterval(() => {
-                        const thisResetData = req.params.id
-                        PasswordResetData.findByIdAndUpdate(thisResetData)
-                            .then((resetFlag) => {
-                                resetFlag.activeFlag = 1
-                                resetFlag.save()
-                            })
-                            .catch(err => res.status(400).json('Error:' + err))
-                    }, 900000);
-                } catch (error) {
-                    res.status(409).json({ message: error.message });
+    try {
+        await PasswordResetData.findOne({ userId: passResetInfo.userId })
+            .then(async resetPassUser => {
+                if (!resetPassUser) {
+                    res.json("Invalid or expired token")
                 }
-            }
-        })
-}
+                await bcrypt.compare(passResetInfo.resetToken, resetPassUser.resetToken)
+                    .then(async isValid => {
+                        if (!isValid) {
+                            res.json("Invalid or expired token")
+                        }
+                        else {
+                            let pwHash = await bcrypt.hash(passResetInfo.password, 10)
+                            userData.findByIdAndUpdate(passResetInfo.userId)
+                                .then(newPassword => {
+                                    newPassword.password = pwHash
+                                    newPassword.save()
+                                    resetPassUser.deleteOne();
+                                    res.json("Password changed successfully")
+                                })
+                        }
+                    })
 
 
-export const validateResetLink = async (req, res) => {
-    const { email, resetToken } = req.body
-    await PasswordResetData.findOne({ email: email })
-        .then(user => {
-            if (!user) {
-                res.json("Invalid or unauthorized access !!")
-            }
-        })
-        .then(timeExpired => {
-            let curTime = new Date();
-            let dbTime = user.createdTime;
-            var diff = diff_minutes(dbTime, curTime)
-            if (diff > 15) {
-                res.status(410).json({ message: "Page Expired" })
-            }
-        })
-        .then(
-            await PasswordResetData.findOne({ resetToken: resetToken })
-        )
-        .then(
-            token => {
-                if (!token) {
-                    res.status(401).status("Invalid reset token")
-                }
-                else {
-                    res.status(200)
-                }
             })
 
+    } catch (error) {
+        console.log(error.message)
+    }
 }
 
-export const changePassword = (req, res) => {
-    const { email, newPassword, confirmPassword } = req.body
 
-    if (newPassword === confirmPassword) {
-
-    }
+export const changePassword = async (req, res) => {
+    const { userId, oldPassword, newPassword } = req.body
+    console.log(oldPassword)
+    await userData.findOne({ _id: userId })
+        .then(async theUser => {
+            if (!theUser) {
+                res.json("No such user exists")
+            }
+            else {
+                await bcrypt.compare(oldPassword, theUser.password)
+                    .then(async isValid => {
+                        if (!isValid) {
+                            res.json("Incorrect value for old password.")
+                        }
+                        else {
+                            let pwHash = await bcrypt.hash(newPassword, 10)
+                            userData.findByIdAndUpdate(userId)
+                                .then(newPassword => {
+                                    newPassword.password = pwHash
+                                    newPassword.save()
+                                    res.json("Password changed successfully")
+                                })
+                        }
+                    })
+            }
+        })
 }

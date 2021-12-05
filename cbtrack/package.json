@@ -10,7 +10,6 @@
 },
   "scripts": {
     "start": "node index.js",
-    // "build": "react-scripts build",
     "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build"
   },
   "author": "",

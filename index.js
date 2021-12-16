@@ -26,7 +26,10 @@ app.use('/api/mails', webMailRoutes);
 app.use('/api/shipment/status', ShipmentStatusRoutes);
 app.use('/api/shipment', ShipmentRoutes);
 app.use('/api/auth', AuthRoutes);
-app.use(express.static(path.join(__dirname, "client", "build")))
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, "client", "build")))
+}
+
 
 
 const CONNECTION_URL = process.env.CONNECTION_URL;

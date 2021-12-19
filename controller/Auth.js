@@ -27,7 +27,8 @@ function diff_minutes(dt2, dt1) {
 
 export const login = async (req, res) => {
     const logininfo = req.body
-    userData.findOne({ username: logininfo.email })
+    console.log(logininfo)
+    await userData.findOne({ email: logininfo.username })
         .then(
             dbUser => {
                 if (!dbUser) {
@@ -35,39 +36,40 @@ export const login = async (req, res) => {
                         message: "No such user available"
                     })
                 }
-
-                bcrypt.compare(logininfo.password, dbUser.password)
-                    .then(
-                        isCorrect => {
-                            if (isCorrect) {
-                                const payload = {
-                                    id: dbUser._id,
-                                    username: dbUser.email
-                                }
-                                jwt.sign(
-                                    payload,
-                                    process.env.JWT_SECRET,
-                                    { expiresIn: 86400 },
-                                    (err, token) => {
-                                        if (err) return res.json({ message: err })
-                                        return res.json({
-                                            message: "Success",
-                                            token: "Bearer " + token,
-                                            isLoggedIn: true,
-                                            username: dbUser.firstName,
-                                            role: dbUser.role,
-                                            status: dbUser.status
-                                        })
+                else {
+                    bcrypt.compare(logininfo.password, dbUser.password)
+                        .then(
+                            isCorrect => {
+                                if (isCorrect) {
+                                    const payload = {
+                                        id: dbUser._id,
+                                        username: dbUser.email
                                     }
-                                )
+                                    jwt.sign(
+                                        payload,
+                                        process.env.JWT_SECRET,
+                                        { expiresIn: 86400 },
+                                        (err, token) => {
+                                            if (err) return res.json({ message: err })
+                                            return res.json({
+                                                message: "Success",
+                                                token: "Bearer " + token,
+                                                isLoggedIn: true,
+                                                username: dbUser.firstName,
+                                                role: dbUser.role,
+                                                status: dbUser.status
+                                            })
+                                        }
+                                    )
+                                }
+                                else {
+                                    return res.json({
+                                        message: "Invalid username or password"
+                                    })
+                                }
                             }
-                            else {
-                                return res.json({
-                                    message: "Invalid username or password"
-                                })
-                            }
-                        }
-                    )
+                        )
+                }
             }
         )
 }

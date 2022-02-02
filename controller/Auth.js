@@ -77,6 +77,7 @@ export const login = async (req, res) => {
 
 export const sendPasswordResetLink = async (req, res) => {
     const { email } = req.body
+    const host = req.headers.host
     const user = await userData.findOne({ email })
     try {
         if (!user) {
@@ -106,7 +107,7 @@ export const sendPasswordResetLink = async (req, res) => {
             to: email,
             subject: `Password reset link`,
             html: '<h2>Please find below the link to reset your password. The link expires in 15 minutes</h2>' +
-                `<p><a href='https://' + req.headers.host + '/resetPassword?user=${user._id}&token=${resetToken}'>Click here to reset password</a></p>`
+                `<p><a href='https://${host}/resetPassword?user=${user._id}&token=${resetToken}'>Click here to reset password</a></p>`
         };
 
         transport.sendMail(mailData, (error, info) => {

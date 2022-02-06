@@ -77,7 +77,7 @@ export const login = async (req, res) => {
 
 export const sendPasswordResetLink = async (req, res) => {
     const { email } = req.body
-    const host = req.headers.host
+    const host = req.headers.origin
     const user = await userData.findOne({ email })
     try {
         if (!user) {
@@ -101,7 +101,7 @@ export const sendPasswordResetLink = async (req, res) => {
                 pass: 'b558a935e37466',
             },
         });
-
+        console.log(host);
         var mailData = {
             from: 'noreply@domain.com',
             to: email,

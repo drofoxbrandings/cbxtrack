@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
+const statusSchema = mongoose.Schema({
+    shipmentDate: { type: Date, default: Date.now },
+    status: { type: String, default: "new" }
+})
+
 const shipmentSchema = mongoose.Schema({
     shipmentRefNo: String,
     shipperName: String,
@@ -18,7 +23,7 @@ const shipmentSchema = mongoose.Schema({
     numberOfPackages: Number,
     pickupDate: { type: Date, default: Date.now },
     deliveryDate: { type: Date, default: Date.now },
-    shipmentStatus: String,
+    shipmentStatus: [statusSchema],
     activeFlag: Boolean,
 })
 

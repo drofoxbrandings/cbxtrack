@@ -20,7 +20,8 @@ export const addShipment = async (req, res) => {
         deliveryCountry,
         commodity,
         numberOfPackages,
-        shipmentStatus,
+        shipmentDate,
+        status,
         activeFlag
     } = req.body;
 
@@ -45,7 +46,7 @@ export const addShipment = async (req, res) => {
         numberOfPackages,
         pickupDate,
         deliveryDate,
-        shipmentStatus,
+        shipmentStatus: { shipmentDate, status },
         activeFlag
     })
     try {
@@ -53,6 +54,39 @@ export const addShipment = async (req, res) => {
         res.status(201).json({ message: "Shipment added successfully !!" });
     } catch (error) {
         res.status(409).json({ message: error.message });
+    }
+}
+
+export const addStatus = async (req, res) => {
+    const {
+        shipmentDate, status
+    } = req.body
+
+    const statusData = {
+        shipmentStatus: { shipmentDate, shipmentDate, status, status },
+    }
+    try {
+
+        await shipmentData
+            .findOneAndUpdate(
+                {
+                    _id: req.body._id,
+                },
+                {
+                    $push: statusData,
+                },
+                { new: true }
+            )
+            .then((result) => {
+                if (result) {
+                    res.status(201).json({ message: "Shipment added successfully !!" });
+                }
+                else {
+                    res.status(409).json({ message: error.message })
+                }
+            });
+    } catch (error) {
+        res.status(409).json({ message: error.message })
     }
 }
 

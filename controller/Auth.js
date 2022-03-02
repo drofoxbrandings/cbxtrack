@@ -54,7 +54,6 @@ export const login = async (req, res) => {
                                             return res.json({
                                                 message: "Success",
                                                 token: "Bearer " + token,
-                                                isLoggedIn: true,
                                                 username: dbUser.firstName,
                                                 role: dbUser.role,
                                                 status: dbUser.status

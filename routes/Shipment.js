@@ -4,21 +4,22 @@ import {
     updateShipment,
     discardShipment,
     activateShipment,
-    updateShipmentStatus,
     deleteShipment,
-    listShipment
+    listShipment,
+    addStatus
 } from '../controller/Shipment.js'
 import { validateShipment } from '../middleware/Validator.js'
+import { auth } from '../middleware/Authentication.js'
 
 const router = express.Router()
 
 
-router.post('/addShipment', validateShipment, addShipment)
-router.put('/updateShipment/:id', updateShipment)
-router.put('/discardShipment/:id', discardShipment)
-router.put('/activateShipment/:id', activateShipment)
-router.put('/updateShipmentStatus/:id', updateShipmentStatus)
-router.post('/deleteShipment/:id', deleteShipment)
-router.get('/listShipment', listShipment)
+router.post('/addShipment', auth, validateShipment, addShipment)
+router.put('/updateShipment/:id', auth, validateShipment, updateShipment)
+router.put('/discardShipment/:id', auth, discardShipment)
+router.put('/activateShipment/:id', auth, activateShipment)
+router.put('/addStatus/:id', auth, addStatus)
+router.post('/deleteShipment/:id', auth, deleteShipment)
+router.get('/listShipment', auth, listShipment)
 
 export default router;

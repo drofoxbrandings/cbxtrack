@@ -58,31 +58,23 @@ export const addShipment = async (req, res) => {
 }
 
 export const addStatus = async (req, res) => {
-    const {
-        shipmentDate, status
-    } = req.body
-
-    const statusData = {
-        shipmentStatus: { shipmentDate, shipmentDate, status, status },
-    }
     try {
-
         await shipmentData
             .findOneAndUpdate(
                 {
-                    _id: req.body._id,
+                    _id: req.params.id,
                 },
                 {
-                    $push: statusData,
+                    $push: req.body,
                 },
                 { new: true }
             )
             .then((result) => {
                 if (result) {
-                    res.status(201).json({ message: "Shipment added successfully !!" });
+                    res.status(201).json({ message: "Shipment status updated successfully !!" });
                 }
                 else {
-                    res.status(409).json({ message: error.message })
+                    res.status(409).json({ message: "Something went wrong!! Please try again" })
                 }
             });
     } catch (error) {
@@ -164,10 +156,10 @@ export const deleteShipment = async (req, res) => {
 
 export const updateShipmentStatus = async (req, res) => {
     const thisShipment = req.params.id
-    let { shipmentStatus } = req.body
+    let { shipmentDate, status } = req.body
     await shipmentData.findByIdAndUpdate(thisShipment)
         .then((shipment) => {
-            shipment.shipmentStatus = shipmentStatus
+            shipment.shipmentStatus = { shipmentDate: shipmentDate, status: status }
             shipment.save()
         })
         .then(() => {

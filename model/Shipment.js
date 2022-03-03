@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const statusSchema = mongoose.Schema({
     shipmentDate: { type: Date, default: Date.now },
-    status: { type: String, default: "new" }
+    status: { type: String, default: "" }
 })
 
 const shipmentSchema = mongoose.Schema({

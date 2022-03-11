@@ -68,16 +68,39 @@ export const addUser = async (req, res) => {
 
 
 export const listUser = async (req, res) => {
-    await userData.find()
-        .then(users => res.json(users))
-        .catch(err => res.status(400).json('Error:' + err))
+    try {
+        await userData.find()
+            .then(users => {
+                if (!users) {
+                    res.status(204).json("No users found !!")
+                }
+                else {
+                    res.json(users)
+                }
+            })
+            .catch(err => res.status(400).json('Error:' + err))
+    } catch (error) {
+        res.json({ message: error.message })
+    }
+
 
 }
 
 export const getSingleUser = async (req, res) => {
-    await userData.findById(req.params.id)
-        .then(users => res.json(users))
-        .catch(err => res.status(400).json('Error:' + err))
+    try {
+        await userData.findById(req.params.id)
+            .then(user => {
+                if (!user) {
+                    res.status(204).json("No such user found !!")
+                }
+                else {
+                    res.json(user)
+                }
+            })
+            .catch(err => res.status(400).json('Error:' + err))
+    } catch (error) {
+        res.json({ message: error.message })
+    }
 
 }
 

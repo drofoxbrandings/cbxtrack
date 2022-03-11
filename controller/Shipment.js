@@ -1,4 +1,5 @@
 import express from 'express';
+import { response } from 'express';
 import mongoose from 'mongoose';
 
 import shipmentData from '../model/Shipment.js'
@@ -89,35 +90,69 @@ export const listShipment = async (req, res) => {
 
 }
 
+export const getShipment = async (req, res) => {
+    const userId = req.params.id
+    console.log(userId)
+    await shipmentData.findOne({ shipmentRefNo: req.params.id })
+        .then(
+            dbUser => {
+                if (!dbUser) {
+                    return res.json({
+                        message: "Invalid reference number"
+                    })
+                }
+                else {
+                    return res.json({
+                        username: dbUser.shipperName,
+                        shipmentFrom: dbUser.shipperCountry,
+                        shipmentTo: dbUser.deliveryCountry,
+                        shipmentStatus: dbUser.shipmentStatus
+                    })
+                }
+            }
+        )
+}
+
 
 export const updateShipment = async (req, res) => {
     const currentShipment = req.params.id
-    shipmentData.findByIdAndUpdate(currentShipment).then((shipment) => {
-        shipment.shipmentRefNo = req.body.shipmentRefNo
-        shipment.shipperName = req.body.shipperName
-        shipment.shipperEmail = req.body.shipperEmail
-        shipment.shipperPhone = req.body.shipperPhone
-        shipment.shipperLocation = req.body.shipperLocation
-        shipment.shipperState = req.body.shipperState
-        shipment.shipperCountry = req.body.shipperCountry
-        shipment.consigneeName = req.body.consigneeName
-        shipment.consigneeEmail = req.body.consigneeEmail
-        shipment.consigneePhone = req.body.consigneePhone
-        shipment.delliverLocation = req.body.delliverLocation
-        shipment.deliveryCity = req.body.deliveryCity
-        shipment.deliveryCountry = req.body.deliveryCountry
-        shipment.commodity = req.body.commodity
-        shipment.numberOfPackages = req.body.numberOfPackages
-        shipment.pickupDate = req.body.pickupDate
-        shipment.deliveryDate = req.body.deliveryDate
-        shipment.shipmentStatus = req.body.shipmentStatus
-        shipment.activeFlag = req.body.activeFlag
-        shipment.save()
+    try {
+
+        shipmentData.findByIdAndUpdate(currentShipment).then((shipment) => {
+            if (!shipment) {
+                res.status(404).json({ status: "404", message: "Data not found in system !!" })
+            }
+            else {
+                shipment.shipmentRefNo = req.body.shipmentRefNo
+                shipment.shipperName = req.body.shipperName
+                shipment.shipperEmail = req.body.shipperEmail
+                shipment.shipperPhone = req.body.shipperPhone
+                shipment.shipperLocation = req.body.shipperLocation
+                shipment.shipperState = req.body.shipperState
+                shipment.shipperCountry = req.body.shipperCountry
+                shipment.consigneeName = req.body.consigneeName
+                shipment.consigneeEmail = req.body.consigneeEmail
+                shipment.consigneePhone = req.body.consigneePhone
+                shipment.delliverLocation = req.body.delliverLocation
+                shipment.deliveryCity = req.body.deliveryCity
+                shipment.deliveryCountry = req.body.deliveryCountry
+                shipment.commodity = req.body.commodity
+                shipment.numberOfPackages = req.body.numberOfPackages
+                shipment.pickupDate = req.body.pickupDate
+                shipment.deliveryDate = req.body.deliveryDate
+                shipment.shipmentStatus = req.body.shipmentStatus
+                shipment.activeFlag = req.body.activeFlag
+                shipment.save()
+            }
+        })
             .then(() => {
                 res.status(200).json({ message: "Shipment information updated successfully! " })
             })
             .catch(err => res.status(400).json('Error:' + err))
-    })
+
+    } catch (error) {
+        res.json({ message: error.message })
+    }
 }
 
 
@@ -148,22 +183,42 @@ export const activateShipment = async (req, res) => {
 }
 
 export const deleteShipment = async (req, res) => {
-    await shipmentData.findByIdAndDelete(req.params.id)
-        .then(() => res.json({ message: "Shipment deleted successfully" }))
-        .catch(err => res.status(400).json('Error:' + err))
+
+    try {
+        await shipmentData.findByIdAndDelete(req.params.id)
+            .then((shipment) => {
+                if (!shipment) {
+                    res.status(404).json({ status: "404", message: "Shipment not found" })
+                }
+                else {
+                    res.json({ status: "200", message: "Shipment deleted successfully" })
+                }
+            })
+            .catch(err => res.status(400).json('Error:' + err))
+    } catch (error) {
+        res.json({ message: error.message })
+    }
+
 }
 
 
 export const updateShipmentStatus = async (req, res) => {
     const thisShipment = req.params.id
     let { shipmentDate, status } = req.body
-    await shipmentData.findByIdAndUpdate(thisShipment)
-        .then((shipment) => {
-            shipment.shipmentStatus = { shipmentDate: shipmentDate, status: status }
-            shipment.save()
-        })
-        .then(() => {
-            res.status(200).json({ message: "Shipment status changed successfully !!" })
-        })
-        .catch(err => res.status(400).json('Error:' + err))
+    try {
+        await shipmentData.findByIdAndUpdate(thisShipment)
+            .then((shipment) => {
+                if (!shipment) {
+                    res.status(404).json({ status: "404", message: "Shipment not found !!" })
+                }
+                else {
+                    shipment.shipmentStatus = { shipmentDate: shipmentDate, status: status }
+                    shipment.save()
+                    res.status(200).json({ message: "Shipment status changed successfully !!" })
+                }
+            })
+            .catch(err => res.status(400).json('Error:' + err))
+    } catch (error) {
+        res.json({ message: error.message })
+    }
 }

@@ -80,9 +80,10 @@ export const sendPasswordResetLink = async (req, res) => {
     const user = await userData.findOne({ email })
     try {
         if (!user) {
-            res.json({ 
+            res.json({
                 status: "404",
-                message: "No such user exists !!" })
+                message: "No such user exists !!"
+            })
         }
         else {
             let token = PasswordResetData.findOne({ userId: user._id });
@@ -118,10 +119,10 @@ export const sendPasswordResetLink = async (req, res) => {
         try {
 
             newResetData.save()
-            res.json({ status: "200", message: "Password reset link sent to your email."})
+            res.json({ status: "200", message: "Password reset link sent to your email." })
         } catch (error) {
 
-            res.json({ status:"409", message: error.message });
+            res.json({ status: "409", message: error.message });
         }
     } catch (error) {
         console.log(error.message)

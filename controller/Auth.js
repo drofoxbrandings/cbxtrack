@@ -78,6 +78,7 @@ export const sendPasswordResetLink = async (req, res) => {
     const { email } = req.body
     const host = req.headers.origin
     const user = await userData.findOne({ email })
+    console.log(user)
     try {
         if (!user) {
             res.json({
@@ -137,12 +138,12 @@ export const resetPassword = async (req, res) => {
         await PasswordResetData.findOne({ userId: passResetInfo.userId })
             .then(async resetPassUser => {
                 if (!resetPassUser) {
-                    res.json("Invalid or expired token")
+                    res.json({ status: "404", message: 'Invalid or expired token' })
                 }
                 await bcrypt.compare(passResetInfo.resetToken, resetPassUser.resetToken)
                     .then(async isValid => {
                         if (!isValid) {
-                            res.json("Invalid or expired token")
+                            res.json({ status: "403", message: 'Invalid or expired token' })
                         }
                         else {
                             let pwHash = await bcrypt.hash(passResetInfo.password, 10)
@@ -151,7 +152,7 @@ export const resetPassword = async (req, res) => {
                                     newPassword.password = pwHash
                                     newPassword.save()
                                     resetPassUser.deleteOne();
-                                    res.json("Password changed successfully")
+                                    res.json({ status: "200", message: 'Invalid or expired token' })
                                 })
                         }
                     })

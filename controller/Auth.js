@@ -27,7 +27,6 @@ function diff_minutes(dt2, dt1) {
 
 export const login = async (req, res) => {
     const logininfo = req.body
-    console.log(logininfo)
     await userData.findOne({ email: logininfo.username })
         .then(
             dbUser => {
@@ -56,7 +55,8 @@ export const login = async (req, res) => {
                                                 token: "Bearer " + token,
                                                 username: dbUser.firstName,
                                                 role: dbUser.role,
-                                                status: dbUser.status
+                                                status: dbUser.status,
+                                                userId: dbUser._id
                                             })
                                         }
                                     )
@@ -78,7 +78,6 @@ export const sendPasswordResetLink = async (req, res) => {
     const { email } = req.body
     const host = req.headers.origin
     const user = await userData.findOne({ email })
-    console.log(user)
     try {
         if (!user) {
             res.json({
@@ -102,7 +101,6 @@ export const sendPasswordResetLink = async (req, res) => {
                 pass: 'b558a935e37466',
             },
         });
-        console.log(host);
         var mailData = {
             from: 'noreply@domain.com',
             to: email,
@@ -133,35 +131,41 @@ export const sendPasswordResetLink = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
     const passResetInfo = req.body
+    if (
+        passResetInfo.userId === null ||
+        passResetInfo.resetToken === null ||
+        passResetInfo.password === null) {
 
-    try {
-        await PasswordResetData.findOne({ userId: passResetInfo.userId })
-            .then(async resetPassUser => {
-                if (!resetPassUser) {
-                    res.json({ status: "404", message: 'Invalid or expired token' })
-                }
-                await bcrypt.compare(passResetInfo.resetToken, resetPassUser.resetToken)
-                    .then(async isValid => {
-                        if (!isValid) {
-                            res.json({ status: "403", message: 'Invalid or expired token' })
-                        }
-                        else {
-                            let pwHash = await bcrypt.hash(passResetInfo.password, 10)
-                            userData.findByIdAndUpdate(passResetInfo.userId)
-                                .then(newPassword => {
-                                    newPassword.password = pwHash
-                                    newPassword.save()
-                                    resetPassUser.deleteOne();
-                                    res.json({ status: "200", message: 'Invalid or expired token' })
-                                })
-                        }
-                    })
+        return res.json({ status: '400', message: "Something went wrong. Try again !!" })
+    }
+    else {
+        try {
+            await PasswordResetData.findOne({ userId: passResetInfo.userId })
+                .then(async resetPassUser => {
+                    if (!resetPassUser) {
+                        res.json({ status: "404", message: 'Invalid or expired token' })
+                    }
+                    await bcrypt.compare(passResetInfo.resetToken, resetPassUser.resetToken)
+                        .then(async isValid => {
+                            if (!isValid) {
+                                res.json({ status: "403", message: 'Invalid or expired token' })
+                            }
+                            else {
+                                let pwHash = await bcrypt.hash(passResetInfo.password, 10)
+                                userData.findByIdAndUpdate(passResetInfo.userId)
+                                    .then(newPassword => {
+                                        newPassword.password = pwHash
+                                        newPassword.save()
+                                        resetPassUser.deleteOne();
+                                        res.json({ status: "200", message: 'Password succesfully changed !!' })
+                                    })
+                            }
+                        })
+                })
 
-
-            })
-
-    } catch (error) {
-        console.log(error.message)
+        } catch (error) {
+            console.log(error.message)
+        }
     }
 }
 
@@ -172,13 +176,13 @@ export const changePassword = async (req, res) => {
     await userData.findOne({ _id: userId })
         .then(async theUser => {
             if (!theUser) {
-                res.json("No such user exists")
+                res.json({ status: '404', message: "No such user exists" })
             }
             else {
                 await bcrypt.compare(oldPassword, theUser.password)
                     .then(async isValid => {
                         if (!isValid) {
-                            res.json("Incorrect value for old password.")
+                            res.json({ status: '400', message: "Incorrect value for old password." })
                         }
                         else {
                             let pwHash = await bcrypt.hash(newPassword, 10)
@@ -186,7 +190,7 @@ export const changePassword = async (req, res) => {
                                 .then(newPassword => {
                                     newPassword.password = pwHash
                                     newPassword.save()
-                                    res.json("Password changed successfully")
+                                    res.json({ status: '200', message: "Password changed successfully" })
                                 })
                         }
                     })

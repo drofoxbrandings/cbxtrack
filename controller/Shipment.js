@@ -1,7 +1,6 @@
 import express from 'express';
 import { response } from 'express';
 import mongoose from 'mongoose';
-
 import shipmentData from '../model/Shipment.js'
 
 export const addShipment = async (req, res) => {
@@ -21,8 +20,7 @@ export const addShipment = async (req, res) => {
         deliveryCountry,
         commodity,
         numberOfPackages,
-        shipmentDate,
-        status,
+        shipmentStatus: { shipmentDate, sStatus },
         activeFlag
     } = req.body;
 
@@ -47,14 +45,14 @@ export const addShipment = async (req, res) => {
         numberOfPackages,
         pickupDate,
         deliveryDate,
-        shipmentStatus: { shipmentDate, status },
+        shipmentStatus: { shipmentDate, sStatus },
         activeFlag
     })
     try {
         await newShipment.save();
-        res.status(201).json({ message: "Shipment added successfully !!" });
+        res.json({ status: '201', message: "Shipment added successfully !!" });
     } catch (error) {
-        res.status(409).json({ message: error.message });
+        res.json({ status: '409', message: error.message });
     }
 }
 
@@ -84,9 +82,12 @@ export const addStatus = async (req, res) => {
 }
 
 export const listShipment = async (req, res) => {
-    await shipmentData.find()
-        .then(status => res.json(status))
-        .catch(err => res.status(400).json('Error:' + err))
+    try {
+        await shipmentData.find()
+            .then(shipment => res.json({ status: '200', data: shipment }))
+    } catch (error) {
+        res.json({ message: error.message })
+    }
 
 }
 
@@ -140,7 +141,7 @@ export const updateShipment = async (req, res) => {
                 shipment.numberOfPackages = req.body.numberOfPackages
                 shipment.pickupDate = req.body.pickupDate
                 shipment.deliveryDate = req.body.deliveryDate
-                shipment.shipmentStatus = req.body.shipmentStatus
+                shipment.shipmentStatus = { shipmentDate: req.body.shipmentDate, sStatus: req.body.sStatus }
                 shipment.activeFlag = req.body.activeFlag
                 shipment.save()
             }
@@ -154,7 +155,6 @@ export const updateShipment = async (req, res) => {
         res.json({ message: error.message })
     }
 }
-
 
 export const discardShipment = async (req, res) => {
     const thisShipment = req.params.id
@@ -201,10 +201,9 @@ export const deleteShipment = async (req, res) => {
 
 }
 
-
 export const updateShipmentStatus = async (req, res) => {
     const thisShipment = req.params.id
-    let { shipmentDate, status } = req.body
+    let { shipmentDate, sStatus } = req.body
     try {
         await shipmentData.findByIdAndUpdate(thisShipment)
             .then((shipment) => {
@@ -212,7 +211,7 @@ export const updateShipmentStatus = async (req, res) => {
                     res.status(404).json({ status: "404", message: "Shipment not found !!" })
                 }
                 else {
-                    shipment.shipmentStatus = { shipmentDate: shipmentDate, status: status }
+                    shipment.shipmentStatus = { shipmentDate: shipmentDate, sStatus: sStatus }
                     shipment.save()
                     res.status(200).json({ message: "Shipment status changed successfully !!" })
                 }

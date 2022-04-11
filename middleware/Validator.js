@@ -175,16 +175,6 @@ export const validateShipment = [
         .exists()
         .isLength({ min: 10 })
         .withMessage('invalid phone number'),
-    check('consigneePhone')
-        .trim()
-        .escape()
-        .not()
-        .isEmpty()
-        .withMessage('Please add consignee phone number')
-        .bail()
-        .exists()
-        .isLength({ min: 10 })
-        .withMessage('invalid phone number'),
     check('delliverLocation')
         .trim()
         .escape()

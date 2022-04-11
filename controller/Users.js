@@ -91,13 +91,13 @@ export const getSingleUser = async (req, res) => {
         await userData.findById(req.params.id)
             .then(user => {
                 if (!user) {
-                    res.status(204).json("No such user found !!")
+                    res.json({ status: '404', message: "No such user found !!" })
                 }
                 else {
-                    res.json(user)
+                    res.json({ status: '200', data: user })
                 }
             })
-            .catch(err => res.status(400).json('Error:' + err))
+            .catch(err => res.json({ status: "400", message: err }))
     } catch (error) {
         res.json({ message: error.message })
     }

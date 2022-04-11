@@ -7,7 +7,8 @@ import {
     deleteShipment,
     listShipment,
     addStatus,
-    getShipment
+    getShipment,
+    updateShipmentStatus
 } from '../controller/Shipment.js'
 import { validateShipment } from '../middleware/Validator.js'
 import { auth } from '../middleware/Authentication.js'
@@ -23,5 +24,6 @@ router.put('/addStatus/:id', auth, addStatus)
 router.post('/deleteShipment/:id', auth, deleteShipment)
 router.get('/listShipment', auth, listShipment)
 router.get('/getShipment/:id', getShipment)
+router.put('/updateShipmentStatus/:id', updateShipmentStatus)
 
 export default router;

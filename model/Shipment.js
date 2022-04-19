@@ -23,7 +23,10 @@ const shipmentSchema = mongoose.Schema({
     numberOfPackages: Number,
     pickupDate: { type: Date, default: Date.now },
     deliveryDate: { type: Date, default: Date.now },
-    shipmentStatus: [statusSchema],
+    shipmentStatus: [{
+        shipmentDate: { type: Date, default: new Date() },
+        sStatus: { type: String }
+    }],
     activeFlag: Boolean,
 })
 

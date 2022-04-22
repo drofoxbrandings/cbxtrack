@@ -21,7 +21,6 @@ export const checkEmailExists = async (req, res) => {
 
 export const checkPhoneExists = async (req, res) => {
     const { phone } = req.body
-    console.log(res)
     try {
         await userData.findOne({ phone: phone }).then((user_phone) => {
             if (user_phone) {

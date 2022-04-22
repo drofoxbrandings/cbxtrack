@@ -3,7 +3,6 @@ export const auth = (req, res, next) => {
     try {
         const token = req.headers['authorization']
         const auth = token && token.split(' ')[1];
-        console.log(req.headers)
         if (!auth)
             return res.json({ status: '401', message: "No authentication token, access denied" });
         const verified = jwt.verify(auth, process.env.JWT_SECRET);

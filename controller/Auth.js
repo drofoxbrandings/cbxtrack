@@ -172,7 +172,6 @@ export const resetPassword = async (req, res) => {
 
 export const changePassword = async (req, res) => {
     const { userId, oldPassword, newPassword } = req.body
-    console.log(oldPassword)
     await userData.findOne({ _id: userId })
         .then(async theUser => {
             if (!theUser) {

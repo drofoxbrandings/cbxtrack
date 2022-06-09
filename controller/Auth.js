@@ -97,8 +97,8 @@ export const sendPasswordResetLink = async (req, res) => {
             host: 'smtp.mailtrap.io',
             port: 587,
             auth: {
-                user: '23fabe778b4dec',
-                pass: 'b558a935e37466',
+                user: 'cfe4a3ec13085a',
+                pass: '658d3e932cf64f',
             },
         });
         var mailData = {

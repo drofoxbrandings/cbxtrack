@@ -27,50 +27,55 @@ function diff_minutes(dt2, dt1) {
 
 export const login = async (req, res) => {
     const logininfo = req.body
-    await userData.findOne({ email: logininfo.username })
-        .then(
-            dbUser => {
-                if (!dbUser) {
-                    return res.status(404).json({
-                        message: "No such user available"
-                    })
-                }
-                else {
-                    bcrypt.compare(logininfo.password, dbUser.password)
-                        .then(
-                            isCorrect => {
-                                if (isCorrect) {
-                                    const payload = {
-                                        id: dbUser._id,
-                                        username: dbUser.email
-                                    }
-                                    jwt.sign(
-                                        payload,
-                                        process.env.JWT_SECRET,
-                                        { expiresIn: 86400 },
-                                        (err, token) => {
-                                            if (err) return res.status(401).json({ message: err })
-                                            return res.status(200).json({
-                                                message: "Success",
-                                                token: "Bearer " + token,
-                                                username: dbUser.firstName,
-                                                role: dbUser.role,
-                                                status: dbUser.status,
-                                                userId: dbUser._id
-                                            })
+    try {
+        await userData.findOne({ email: logininfo.username })
+            .then(
+                dbUser => {
+                    if (!dbUser) {
+                        return res.status(404).json({
+                            message: "No such user available"
+                        })
+                    }
+                    else {
+                        bcrypt.compare(logininfo.password, dbUser.password)
+                            .then(
+                                isCorrect => {
+                                    if (isCorrect) {
+                                        const payload = {
+                                            id: dbUser._id,
+                                            username: dbUser.email
                                         }
-                                    )
+                                        jwt.sign(
+                                            payload,
+                                            process.env.JWT_SECRET,
+                                            { expiresIn: 86400 },
+                                            (err, token) => {
+                                                if (err) return res.status(401).json({ message: err })
+                                                return res.status(200).json({
+                                                    message: "Success",
+                                                    token: "Bearer " + token,
+                                                    username: dbUser.firstName,
+                                                    role: dbUser.role,
+                                                    status: dbUser.status,
+                                                    userId: dbUser._id
+                                                })
+                                            }
+                                        )
+                                    }
+                                    else {
+                                        return res.status(401).json({
+                                            message: "Invalid username or password"
+                                        })
+                                    }
                                 }
-                                else {
-                                    return res.status(401).json({
-                                        message: "Invalid username or password"
-                                    })
-                                }
-                            }
-                        )
+                            )
+                    }
                 }
-            }
-        )
+            )
+
+    } catch (error) {
+        return res.status(500).json({message: error.message})
+    }
 }
 
 
@@ -110,7 +115,7 @@ export const sendPasswordResetLink = async (req, res) => {
 
         transport.sendMail(mailData, (error, info) => {
             if (error) {
-                return console.log(error);
+                return res.status(424).json({message: error.message});
             }
         });
         const newResetData = new PasswordResetData({ userId: user._id, email: email, resetToken: hash, createdTime: Date.now() })
@@ -123,8 +128,7 @@ export const sendPasswordResetLink = async (req, res) => {
             res.status(409).json({ message: error.message });
         }
     } catch (error) {
-        console.log(error.message)
-        return res.status(500).json({ message: error.message })
+        return res.status(500).json({message: error.message})
     }
 
 }
@@ -143,7 +147,7 @@ export const resetPassword = async (req, res) => {
             await PasswordResetData.findOne({ userId: passResetInfo.userId })
                 .then(async resetPassUser => {
                     if (!resetPassUser) {
-                        res.status(404).json({ message: 'Invalid or expired token' })
+                        res.status(404).json({message: 'Invalid or expired token' })
                     }
                     await bcrypt.compare(passResetInfo.resetToken, resetPassUser.resetToken)
                         .then(async isValid => {
@@ -157,14 +161,14 @@ export const resetPassword = async (req, res) => {
                                         newPassword.password = pwHash
                                         newPassword.save()
                                         resetPassUser.deleteOne();
-                                        res.status(200).json({ message: 'Password succesfully changed !!' })
+                                        res.status(200).json({message: 'Password succesfully changed !!' })
                                     })
                             }
                         })
                 })
 
         } catch (error) {
-            console.log(error.message)
+            return res.status(500).json({message: error.message})
         }
     }
 }
@@ -181,7 +185,7 @@ export const changePassword = async (req, res) => {
                 await bcrypt.compare(oldPassword, theUser.password)
                     .then(async isValid => {
                         if (!isValid) {
-                            res.status(400).json({ message: "Incorrect value for old password." })
+                            res.status(400).json({message: "Incorrect value for old password." })
                         }
                         else {
                             let pwHash = await bcrypt.hash(newPassword, 10)

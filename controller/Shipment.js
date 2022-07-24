@@ -51,9 +51,9 @@ export const addShipment = async (req, res) => {
     try {
         await newShipment.save();
         await newShipment.populate()
-        res.json({ status: '201', message: "Shipment added successfully !!" });
+        res.status(201).json({ message: "Shipment added successfully !!" });
     } catch (error) {
-        res.json({ status: '409', message: error.message });
+        res.status(409).json({ message: error.message });
     }
 }
 
@@ -71,25 +71,25 @@ export const addStatus = async (req, res) => {
             )
             .then((result) => {
                 if (result) {
-                    res.json({ status: '201', message: "Shipment status updated successfully !!" });
+                    res.status(201).json({ message: "Shipment status updated successfully !!" });
                 }
                 else {
-                    res.json({ status: '409', message: "Something went wrong!! Please try again" })
+                    res.status(409).json({ message: "Something went wrong!! Please try again" })
                 }
             });
     } catch (error) {
-        res.json({ status: '409', message: error.message })
+        res.status(409).json({ message: error.message })
     }
 }
 
 export const listShipment = async (req, res) => {
     const limit = req.params.limit
-    const offset= req.params.offset
+    const offset = req.params.offset
     try {
         await shipmentData.find().skip(offset).limit(limit)
-            .then(shipment => res.json({ status: '200', data: shipment, totalRows: shipment.length }))
+            .then(shipment => res.status(200).json({ data: shipment, totalRows: shipment.length }))
     } catch (error) {
-        res.json({ message: error.message })
+        res.status(500).json({ message: error.message })
     }
 
 }
@@ -100,12 +100,12 @@ export const getShipment = async (req, res) => {
         .then(
             dbUser => {
                 if (!dbUser) {
-                    return res.json({
+                    return res.status(401).json({
                         message: "Invalid reference number"
                     })
                 }
                 else {
-                    return res.json({
+                    return res.status(200).json({
                         username: dbUser.shipperName,
                         shipmentFrom: dbUser.shipperCountry,
                         shipmentTo: dbUser.deliveryCountry,
@@ -123,7 +123,7 @@ export const updateShipment = async (req, res) => {
 
         shipmentData.findByIdAndUpdate(currentShipment).then((shipment) => {
             if (!shipment) {
-                res.json({ status: "404", message: "Data not found in system !!" })
+                res.status(404).json({ message: "Data not found in system !!" })
             }
             else {
                 shipment.shipmentRefNo = req.body.shipmentRefNo
@@ -152,12 +152,12 @@ export const updateShipment = async (req, res) => {
             }
         })
             .then(() => {
-                res.json({ status: '200', message: "Shipment information updated successfully! " })
+                res.status(200).json({ message: "Shipment information updated successfully! " })
             })
-            .catch(err => res.json({ message: err.message }))
+            .catch(err => res.status(409).json({ message: err.message }))
 
     } catch (error) {
-        res.json({ message: error.message })
+        res.status(500).json({ message: error.message })
     }
 }
 
@@ -169,9 +169,9 @@ export const discardShipment = async (req, res) => {
             shipment.save()
         })
         .then(() => {
-            res.json({ status: '200', message: "Shipment discarded successfully !!" })
+            res.status(200).json({ message: "Shipment discarded successfully !!" })
         })
-        .catch(err => res.json({ status: '400', message: err.message }))
+        .catch(err => res.status(400).json({ message: err.message }))
 }
 
 export const activateShipment = async (req, res) => {
@@ -182,9 +182,9 @@ export const activateShipment = async (req, res) => {
             shipment.save()
         })
         .then(() => {
-            res.json({ status: '200', message: "Shipment re-activated successfully !!" })
+            res.status(200).json({ message: "Shipment re-activated successfully !!" })
         })
-        .catch(err => res.json({ status: '400', message: err.message }))
+        .catch(err => res.status(400).json({ status: '400', message: err.message }))
 }
 
 export const deleteShipment = async (req, res) => {
@@ -193,15 +193,15 @@ export const deleteShipment = async (req, res) => {
         await shipmentData.findByIdAndDelete(req.params.id)
             .then((shipment) => {
                 if (!shipment) {
-                    res.json({ status: "404", message: "Shipment not found" })
+                    res.status(404).json({ message: "Shipment not found" })
                 }
                 else {
-                    res.json({ status: "200", message: "Shipment deleted successfully" })
+                    res.status(200).json({ message: "Shipment deleted successfully" })
                 }
             })
-            .catch(err => res.json({ status: '500', message: err.message }))
+            .catch(err => res.status(409).json({ message: err.message }))
     } catch (error) {
-        res.json({ message: error.message })
+        res.status(500).json({ message: error.message })
     }
 
 }
@@ -213,7 +213,7 @@ export const updateShipmentStatus = async (req, res) => {
         await shipmentData.findByIdAndUpdate(thisShipment)
             .then((shipment) => {
                 if (!shipment) {
-                    res.json({ status: "404", message: "Shipment not found !!" })
+                    res.status(404).json({ message: "Shipment not found !!" })
                 }
                 else {
                     shipment.shipmentStatus.push({
@@ -221,11 +221,11 @@ export const updateShipmentStatus = async (req, res) => {
                         sStatus: req.body.shipmentStatus.sStatus
                     })
                     shipment.save()
-                    res.json({ status: '200', message: "Shipment status changed successfully !!" })
+                    res.status(200).json({ message: "Shipment status changed successfully !!" })
                 }
             })
-            .catch(err => res.json({ status: '500', message: err.message }))
+            .catch(err => res.status(500).json({ message: err.message }))
     } catch (error) {
-        res.json({ message: error.message })
+        res.status(500).json({ message: error.message })
     }
 }

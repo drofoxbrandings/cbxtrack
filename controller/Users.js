@@ -7,14 +7,15 @@ export const checkEmailExists = async (req, res) => {
     try {
         await userData.findOne({ email: email }).then((user_email) => {
             if (user_email) {
-                res.status(200).send("The email id is already registered!!")
+                res.status(200).json({ message: "The email id is already registered!!" })
             }
             else {
-                res.status(404).send()
+                res.status(404).json({ message: 'The email is not found' })
             }
         })
     } catch (error) {
         console.log(error)
+        res.status(500).json({ message: error.message })
     }
 }
 
@@ -24,15 +25,15 @@ export const checkPhoneExists = async (req, res) => {
     try {
         await userData.findOne({ phone: phone }).then((user_phone) => {
             if (user_phone) {
-
-                res.status(200).send("The phone number is already registered!!")
+                res.status(200).json({ message: "The phone number is already registered!!" })
             }
             else {
-                res.status(404).send()
+                res.status(404).json({ message: 'The phone number not found' })
             }
         })
     } catch (error) {
         console.log(error)
+        res.status(500).json({ message: error.message })
     }
 }
 
@@ -41,14 +42,15 @@ export const checkEidExists = async (req, res) => {
     try {
         await userData.findOne({ emiratesId: emiratesId }).then((eid) => {
             if (eid) {
-                res.status(200).send("The Emirates id is already registered!!")
+                res.status(200).json({ message: "The Emirates id is already registered!!" })
             }
             else {
-                res.status(404).send()
+                res.status(404).json({ message: "The Emirates id not found" })
             }
         })
     } catch (error) {
         console.log(error)
+        res.status(500).json({ message: error.message })
     }
 }
 
@@ -71,15 +73,15 @@ export const listUser = async (req, res) => {
         await userData.find()
             .then(users => {
                 if (!users) {
-                    res.status(204).json("No users found !!")
+                    res.status(404).json("No users found !!")
                 }
                 else {
-                    res.json(users)
+                    res.status(200).json(users)
                 }
             })
             .catch(err => res.status(400).json('Error:' + err))
     } catch (error) {
-        res.json({ message: error.message })
+        res.status(500).json({ message: error.message })
     }
 
 
@@ -90,15 +92,15 @@ export const getSingleUser = async (req, res) => {
         await userData.findById(req.params.id)
             .then(user => {
                 if (!user) {
-                    res.json({ status: '404', message: "No such user found !!" })
+                    res.status(404).json({ message: "No such user found !!" })
                 }
                 else {
-                    res.json({ status: '200', data: user })
+                    res.status(200).json({ data: user })
                 }
             })
-            .catch(err => res.json({ status: "400", message: err }))
+            .catch(err => res.status(400).json({ message: err }))
     } catch (error) {
-        res.json({ message: error.message })
+        res.status(500).json({ message: error.message })
     }
 
 }
@@ -126,6 +128,6 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
     await userData.findByIdAndDelete(req.params.id)
-        .then(() => res.json({ message: "User deleted successfully" }))
+        .then(() => res.status(204).json({ message: "User deleted successfully" }))
         .catch(err => res.status(400).json('Error:' + err))
 }

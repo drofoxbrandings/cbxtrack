@@ -30,7 +30,7 @@ export const addStatus = async (req, res) => {
 
 export const listStatus = async (req, res) => {
     await shipmentStatusData.find()
-        .then(status => res.json(status))
+        .then(status => res.status(200).json(status))
         .catch(err => res.status(400).json('Error:' + err))
 
 }
@@ -38,6 +38,6 @@ export const listStatus = async (req, res) => {
 
 export const deleteStatus = async (req, res) => {
     await shipmentStatusData.findByIdAndDelete(req.params.id)
-        .then(() => res.json({ message: "Status deleted successfully" }))
+        .then(() => res.status(200).json({ message: "Status deleted successfully" }))
         .catch(err => res.status(400).json('Error:' + err))
 }

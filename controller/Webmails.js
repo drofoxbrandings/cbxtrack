@@ -16,20 +16,20 @@ export const saveWebMail = async (req, res) => {
 
 export const listWebMail = async (req, res) => {
     await webMailData.find()
-        .then(mails => res.json(mails))
+        .then(mails => res.status(200).json(mails))
         .catch(err => res.status(400).json('Error:' + err))
 
 }
 
 export const getSingleMail = async (req, res) => {
     await webMailData.findById(req.params.id)
-        .then(mails => res.json(mails))
+        .then(mails => res.status(200).json(mails))
         .catch(err => res.status(400).json('Error:' + err))
 
 }
 
 export const deleteMail = async (req, res) => {
     await webMailData.findByIdAndDelete(req.params.id)
-        .then(() => res.json({ message: "Mail deleted successfully" }))
+        .then(() => res.status(204).json({ message: "Mail deleted successfully" }))
         .catch(err => res.status(400).json('Error:' + err))
 }

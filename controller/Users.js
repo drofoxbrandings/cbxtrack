@@ -95,7 +95,7 @@ export const getSingleUser = async (req, res) => {
                     res.status(404).json({ message: "No such user found !!" })
                 }
                 else {
-                    res.status(200).json({ data: user })
+                    res.status(200).json({ data: user, message: '' })
                 }
             })
             .catch(err => res.status(400).json({ message: err }))

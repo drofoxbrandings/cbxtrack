@@ -116,7 +116,7 @@ export const updateUser = async (req, res) => {
         user.emiratesId = req.body.emiratesId
         user.employeeId = req.body.employeeId
         user.role = req.body.role
-        user.password = req.body.password
+        user.password = req.body.password !== "" || req.body.password !== null ? req.body.password : user.password
         user.status = req.body.status
         user.save()
             .then(() => {

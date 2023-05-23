@@ -13,7 +13,8 @@ RUN npm install
 # Copy the rest of the app's source code to the container
 COPY . .
 
-# Set the command to start your app
-CMD ["node", "index.js"]
-
+ENV PORT 5000
 EXPOSE 5000
+
+# Set the command to start your app
+CMD ["npm", "start"]

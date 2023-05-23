@@ -13,10 +13,10 @@ RUN npm install
 # Copy the rest of the app's source code to the container
 COPY . .
 
-ENV PORT 5000
+ENV PORT 8080
 ENV CONNECTION_URL mongodb+srv://drofoxbrandings:W5wBPMigwggFvXr5@cityboxcargos.zjpt9p4.mongodb.net/cityboxcargos
 ENV JWT_SECRET bBxNsGYmdWXPiJAmrpeIcGYRzESePZriiGfxjZnxiChjddusFe
-EXPOSE 5000
+EXPOSE 8080
 
 # Set the command to start your app
 CMD ["npm", "start"]

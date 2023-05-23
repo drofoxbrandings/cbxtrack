@@ -15,3 +15,5 @@ COPY . .
 
 # Set the command to start your app
 CMD ["npm", "start"]
+
+EXPOSE 5000

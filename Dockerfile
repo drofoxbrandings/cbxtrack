@@ -14,6 +14,8 @@ RUN npm install
 COPY . .
 
 ENV PORT 5000
+ENV CONNECTION_URL mongodb+srv://drofoxbrandings:W5wBPMigwggFvXr5@cityboxcargos.zjpt9p4.mongodb.net/cityboxcargos
+ENV JWT_SECRET bBxNsGYmdWXPiJAmrpeIcGYRzESePZriiGfxjZnxiChjddusFe
 EXPOSE 5000
 
 # Set the command to start your app

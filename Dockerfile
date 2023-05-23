@@ -14,6 +14,6 @@ RUN npm install
 COPY . .
 
 # Set the command to start your app
-CMD ["npm", "start"]
+CMD ["node", "index.js"]
 
 EXPOSE 5000

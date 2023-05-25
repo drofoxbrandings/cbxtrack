@@ -28,8 +28,21 @@ const createReferenceNumber = async () => {
   return newRefNumber;
 };
 
+const generateRandomString = async () => {
+  const characters =
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let randomString = "";
+
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    randomString += characters[randomIndex];
+  }
+
+  return randomString;
+};
+
 export const addShipment = async (req, res) => {
-  const refNo = await createReferenceNumber();
+  const refNo = await generateRandomString();
   const {
     shipperName,
     shipperEmail,

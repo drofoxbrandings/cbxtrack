@@ -2,6 +2,7 @@ import express from "express";
 import { response } from "express";
 import mongoose from "mongoose";
 import shipmentData from "../model/Shipment.js";
+import statusData from "../model/shipmentStatus.js";
 
 const createReferenceNumber = async () => {
   let newRefNumber = "";
@@ -29,8 +30,7 @@ const createReferenceNumber = async () => {
 };
 
 const generateRandomString = async () => {
-  const characters =
-    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let randomString = "";
 
   for (let i = 0; i < 6; i++) {
@@ -43,6 +43,7 @@ const generateRandomString = async () => {
 
 export const addShipment = async (req, res) => {
   const refNo = await generateRandomString();
+  console.log(req.body);
   const {
     shipperName,
     shipperEmail,
@@ -53,12 +54,19 @@ export const addShipment = async (req, res) => {
     consigneeName,
     consigneeEmail,
     consigneePhone,
+    consigneePostalCode,
     delliverLocation,
     deliveryCity,
     deliveryCountry,
     commodity,
     numberOfPackages,
-    shipmentStatus: { shipmentDate, sStatus },
+    shipmentStatus: { shipmentDate, sStatus, statusReason },
+    containerNumber,
+    expectedDepartureDate,
+    expectedArrivalDate,
+    carrierName,
+    carrierTrackingId,
+    carrierLink,
     activeFlag,
   } = req.body;
 
@@ -76,6 +84,7 @@ export const addShipment = async (req, res) => {
     consigneeName,
     consigneeEmail,
     consigneePhone,
+    consigneePostalCode,
     delliverLocation,
     deliveryCity,
     deliveryCountry,
@@ -83,7 +92,13 @@ export const addShipment = async (req, res) => {
     numberOfPackages,
     pickupDate,
     deliveryDate,
-    shipmentStatus: { shipmentDate, sStatus },
+    shipmentStatus: { shipmentDate, sStatus, statusReason },
+    containerNumber,
+    expectedDepartureDate,
+    expectedArrivalDate,
+    carrierName,
+    carrierTrackingId,
+    carrierLink,
     activeFlag,
   });
   try {
@@ -126,7 +141,12 @@ export const addStatus = async (req, res) => {
 export const listShipment = async (req, res) => {
   const limit = req.query.limit || 100;
   const offset = req.query.offset || 0;
-  const query = shipmentData.find().skip(parseInt(offset));
+  const { filter, field } = req.query;
+  const filterCriteria = {};
+  if (filter && field) {
+    filterCriteria[field] = { $regex: new RegExp(filter, "i") };
+  }
+  const query = shipmentData.find(filterCriteria).skip(parseInt(offset));
   try {
     const result = await query.limit(parseInt(limit));
     const count = await shipmentData.count();
@@ -140,17 +160,14 @@ export const getShipment = async (req, res) => {
   const userId = req.params.id;
   await shipmentData
     .findOne({ shipmentRefNo: req.params.id })
-    .then((dbUser) => {
-      if (!dbUser) {
+    .then((result) => {
+      if (!result) {
         return res.status(401).json({
           message: "Invalid reference number",
         });
       } else {
         return res.status(200).json({
-          username: dbUser.shipperName,
-          shipmentFrom: dbUser.shipperCountry,
-          shipmentTo: dbUser.deliveryCountry,
-          shipmentStatus: dbUser.shipmentStatus,
+          data: result,
         });
       }
     });
@@ -159,43 +176,36 @@ export const getShipment = async (req, res) => {
 export const updateShipment = async (req, res) => {
   const currentShipment = req.params.id;
   try {
-    shipmentData
-      .findByIdAndUpdate(currentShipment)
-      .then((shipment) => {
-        if (!shipment) {
-          res.status(404).json({ message: "Data not found in system !!" });
-        } else {
-          shipment.shipmentRefNo = req.body.shipmentRefNo;
-          shipment.shipperName = req.body.shipperName;
-          shipment.shipperEmail = req.body.shipperEmail;
-          shipment.shipperPhone = req.body.shipperPhone;
-          shipment.shipperLocation = req.body.shipperLocation;
-          shipment.shipperState = req.body.shipperState;
-          shipment.shipperCountry = req.body.shipperCountry;
-          shipment.consigneeName = req.body.consigneeName;
-          shipment.consigneeEmail = req.body.consigneeEmail;
-          shipment.consigneePhone = req.body.consigneePhone;
-          shipment.delliverLocation = req.body.delliverLocation;
-          shipment.deliveryCity = req.body.deliveryCity;
-          shipment.deliveryCountry = req.body.deliveryCountry;
-          shipment.commodity = req.body.commodity;
-          shipment.numberOfPackages = req.body.numberOfPackages;
-          shipment.pickupDate = req.body.pickupDate;
-          shipment.deliveryDate = req.body.deliveryDate;
-          shipment.activeFlag = req.body.activeFlag;
-          shipment.shipmentStatus.push({
-            shipmentDate: req.body.shipmentStatus.shipmentDate,
-            sStatus: req.body.shipmentStatus.sStatus,
-          });
-          shipment.save();
-        }
-      })
-      .then(() => {
-        res
-          .status(200)
-          .json({ message: "Shipment information updated successfully! " });
-      })
-      .catch((err) => res.status(409).json({ message: err.message }));
+    const { shipmentDate, sStatus, statusReason } = req.body.shipmentStatus;
+
+    // Fetch status data from the status collection
+    const status = await statusData.find({ sStatus: sStatus });
+    const isStatus = status.some((item) => item.shipmentStatus === sStatus);
+    if (!isStatus) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+    // Use the $push operator to add the new shipmentStatus to the array
+    const updatedShipment = await shipmentData.findByIdAndUpdate(
+      currentShipment,
+      {
+        $push: {
+          shipmentStatus: {
+            shipmentDate: shipmentDate,
+            sStatus: sStatus,
+            statusReason: statusReason,
+          },
+        },
+      },
+      { new: true }
+    );
+    if (!updatedShipment) {
+      return res
+        .status(404)
+        .json({ message: "Data not found in the system!!" });
+    }
+    res
+      .status(200)
+      .json({ message: "Shipment information updated successfully!" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -260,25 +270,35 @@ export const deleteShipment = async (req, res) => {
 
 export const updateShipmentStatus = async (req, res) => {
   const thisShipment = req.params.id;
-  let { shipmentStatus } = req.body;
   try {
-    await shipmentData
-      .findByIdAndUpdate(thisShipment)
-      .then((shipment) => {
-        if (!shipment) {
-          res.status(404).json({ message: "Shipment not found !!" });
-        } else {
-          shipment.shipmentStatus.push({
-            shipmentDate: req.body.shipmentStatus.shipmentDate,
-            sStatus: req.body.shipmentStatus.sStatus,
-          });
-          shipment.save();
-          res
-            .status(200)
-            .json({ message: "Shipment status changed successfully !!" });
-        }
-      })
-      .catch((err) => res.status(500).json({ message: err.message }));
+    const { shipmentDate, sStatus } = req.body.shipmentStatus;
+
+    // Fetch status data from the status collection
+    const status = await statusData.find({ sStatus: sStatus });
+    const isStatus = status.some((item) => item.shipmentStatus === sStatus);
+    if (!isStatus) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const shipment = await shipmentData.findByIdAndUpdate(
+      thisShipment,
+      {
+        $push: {
+          shipmentStatus: {
+            shipmentDate: shipmentDate,
+            sStatus: sStatus,
+          },
+        },
+      },
+      { new: true } // Return the updated shipment document
+    );
+    if (!shipment) {
+      return res.status(404).json({ message: "Shipment not found !!" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Shipment status changed successfully !!" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

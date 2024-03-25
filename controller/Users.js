@@ -128,7 +128,7 @@ export const updateUser = async (req, res) => {
   if (req.body.password !== null || req.body.password !== "") {
     newPassword = await bcrypt.hash(req.body.password, 10);
   }
-  userData.findByIdAndUpdate(currentUser).then((user) => {
+  await userData.findByIdAndUpdate(currentUser).then((user) => {
     user.firstName = req.body.firstName;
     user.LastName = req.body.LastName;
     user.email = req.body.email;

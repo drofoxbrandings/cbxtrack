@@ -22,10 +22,27 @@ function diff_minutes(dt2, dt1) {
   return Math.abs(Math.round(diff));
 }
 
+export const getToken = async (req, res) => {
+  const payload = {
+    guestId: makeid(8),
+  };
+  jwt.sign(
+    payload,
+    process.env.JWT_SECRET,
+    { expiresIn: 86400 },
+    (err, token) => {
+      if (err) return res.status(401).json({ message: err });
+      return res.status(200).json({
+        token: token,
+      });
+    }
+  );
+};
+
 export const login = async (req, res) => {
   const logininfo = req.body;
   try {
-    await userData.findOne({ email: logininfo.username }).then((dbUser) => {
+    await userData.findOne({ firstName: logininfo.username }).then((dbUser) => {
       if (!dbUser) {
         return res.status(404).json({
           message: "No such user available",
@@ -37,7 +54,7 @@ export const login = async (req, res) => {
             if (isCorrect) {
               const payload = {
                 id: dbUser._id,
-                username: dbUser.email,
+                username: dbUser.firstName,
               };
               jwt.sign(
                 payload,

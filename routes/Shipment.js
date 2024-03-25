@@ -23,7 +23,7 @@ router.put('/activateShipment/:id', auth, activateShipment)
 router.put('/addStatus/:id', auth, addStatus)
 router.post('/deleteShipment/:id', auth, deleteShipment)
 router.get('/listShipment', auth, listShipment)
-router.get('/getShipment/:id', getShipment)
-router.put('/updateShipmentStatus/:id', updateShipmentStatus)
+router.get('/getShipment/:id', auth, getShipment)
+router.put('/updateShipmentStatus/:id', auth, updateShipmentStatus)
 
 export default router;

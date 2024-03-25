@@ -9,18 +9,18 @@ import ShipmentStatusRoutes from './routes/ShipmentStatus.js';
 import ShipmentRoutes from './routes/Shipment.js';
 import AuthRoutes from './routes/Auth.js';
 import path from 'path'
-
+ 
 ENV.config()
 const app = express()
 
 app.use(express.json());
 app.use(cors({
-    // origin: "http://localhost"
+    origin: ["http://localhost:3001", "http://localhost:3000", "http://localhost:3002"]
 }))
 
 const __dirname = path.resolve();
 
-
+ 
 app.use('/api/user', userRoutes);
 app.use('/api/mails', webMailRoutes);
 app.use('/api/shipment/status', ShipmentStatusRoutes);
